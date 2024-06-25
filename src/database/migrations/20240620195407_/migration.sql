@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "tb_avatar" ALTER COLUMN "image" SET DATA TYPE VARCHAR(255);

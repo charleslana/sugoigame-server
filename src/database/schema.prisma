@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleEnum {
+  admin
+  user
+}
+
+enum GenderEnum {
+  male
+  female
+}
+
+enum FactionEnum {
+  pirate
+  marine
+  revolutionary
+}
+
+enum SeaEnum {
+  north_blue @map("north-blue")
+  east_blue  @map("east-blue")
+  south_blue @map("south-blue")
+  west_blue  @map("west-blue")
+}
+
+enum BreedEnum {
+  human
+  dwarf
+  giant
+  merman
+  cyborg
+}
+
+enum CharacterClassEnum {
+  swordsman
+  shooter
+  fighter
+}
+
+model User {
+  id             Int             @id @default(autoincrement())
+  email          String          @unique @db.VarChar(255)
+  password       String
+  username       String          @db.VarChar(20)
+  name           String          @db.VarChar(50)
+  gender         GenderEnum
+  credit         Int             @default(0)
+  bannedTime     DateTime?       @map("banned_time")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at")
+  roles          Role[]
+  userCharacters UserCharacter[]
+
+  @@map(name: "tb_user")
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      RoleEnum @default(user)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int      @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map(name: "tb_user_role")
+}
+
+model Character {
+  id             Int             @id @default(autoincrement())
+  name           String          @unique @db.VarChar(255)
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at")
+  userCharacters UserCharacter[]
+  avatars        Avatar[]
+
+  @@map(name: "tb_character")
+}
+
+model Avatar {
+  id          Int       @id @default(autoincrement())
+  image       String    @db.VarChar(255)
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  characterId Int       @map("character_id")
+
+  @@map(name: "tb_avatar")
+}
+
+model UserCharacter {
+  id          Int                @id @default(autoincrement())
+  name        String             @unique @db.VarChar(20)
+  faction     FactionEnum
+  sea         SeaEnum
+  breed       BreedEnum
+  class       CharacterClassEnum
+  level       Int                @default(1)
+  coin        Int                @default(5500)
+  hp          Int                @default(100)
+  mp          Int                @default(100)
+  stamina     Int                @default(60)
+  exp         Int                @default(0)
+  bannedTime  DateTime?          @map("banned_time")
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int                @map("user_id")
+  character   Character          @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  characterId Int                @map("character_id")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @default(now()) @updatedAt @map("updated_at")
+
+  @@map(name: "tb_user_character")
+}
